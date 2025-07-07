@@ -13,6 +13,10 @@
     "@tailwindcss/vite": "^4.1.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+<<<<<<< HEAD
+=======
+    "react-router-dom": "^7.6.3",
+>>>>>>> 5edf657 (Added new UI and fixed task delete bug)
     "tailwindcss": "^4.1.8",
     "uuid": "^11.1.0"
   },
