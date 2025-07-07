@@ -4,10 +4,18 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#e0f7fa] via-[#e1bee7] to-[#fce4ec] px-4">
       <div className="w-full max-w-md p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
-        <h2 className="text-3xl font-bold text-center text-purple-700 mb-6">
-          Welcome Back
-        </h2>
         
+        {/* Logo + App Name */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-400 text-white rounded-full flex items-center justify-center shadow-md text-xl font-bold">
+            ✓
+          </div>
+          <h1 className="text-2xl font-extrabold text-purple-700 tracking-wide">
+            Todo<span className="text-pink-500">Master</span>
+          </h1>
+        </div>
+
+        {/* Form */}
         <form className="space-y-5">
           <div>
             <label className="block text-gray-700 font-medium mb-1" htmlFor="email">
