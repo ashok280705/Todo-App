@@ -16,6 +16,12 @@ const dbName = "TODO-APP";
 
 client.connect();
 
+app.post("/todo", async (req, res) => {
+  await client.connect();
+  const db = client.db(dbName);
+  const collection = db.collection("todos");
+  const { title, description } = req.body;})
+  
 app.post("/login", async (req, res) => {
   await client.connect();
   const db = client.db(dbName);

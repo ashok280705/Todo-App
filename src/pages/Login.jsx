@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
+import Usercontext from "../context/context";
 
 const Login = () => {
+  const { setcurrentUser } = useContext(Usercontext);
+  const [isRegister, setisRegister] = useState(false);
+
+  const handleToggle = () => {
+    setisRegister(!isRegister);
+  };
+
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#e0f7fa] via-[#e1bee7] to-[#fce4ec] px-4">
       <div className="w-full max-w-md p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
@@ -17,6 +26,20 @@ const Login = () => {
 
         {/* Form */}
         <form className="space-y-5">
+          {/* Username - always shown */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1" htmlFor="username">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              placeholder="Your username"
+            />
+          </div>
+
+          {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium mb-1" htmlFor="email">
               Email
@@ -29,6 +52,7 @@ const Login = () => {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-gray-700 font-medium mb-1" htmlFor="password">
               Password
@@ -42,14 +66,21 @@ const Login = () => {
           </div>
 
           <button
-            type="submit"
+            onClick={(e) => {alert("Button Clicked"); }}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-lg shadow-md transition-all duration-300"
           >
-            Login
+            {isRegister ? "Sign Up" : "Login"}
           </button>
 
           <p className="text-center text-sm text-gray-600 mt-4">
-            Don't have an account? <a href="#" className="text-purple-700 font-medium hover:underline">Sign up</a>
+            {isRegister ? "Already have an account?" : "Don't have an account?"}{' '}
+            <button
+              type="button"
+              onClick={handleToggle}
+              className="text-purple-700 font-medium hover:underline"
+            >
+              {isRegister ? "Login" : "Sign up"}
+            </button>
           </p>
         </form>
       </div>
