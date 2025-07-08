@@ -11,6 +11,8 @@ const Login = () => {
 
 
   return (
+    //this is the main container for the login page
+    
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#e0f7fa] via-[#e1bee7] to-[#fce4ec] px-4">
       <div className="w-full max-w-md p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl">
         
