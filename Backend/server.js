@@ -17,37 +17,116 @@ const dbName = "TODO-APP";
 client.connect();
 
 app.post("/todo", async (req, res) => {
-  await client.connect();
   const db = client.db(dbName);
-  const collection = db.collection("todos");
-  const { title, description } = req.body;})
-  
+  const users = db.collection("users");
+  const { owner, todo } = req.body;
+
+  if (!owner || !todo) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+  const result = await users.updateOne(
+    { username: owner },
+    { $push: { todos: { todo } } }
+  );
+
+  if (result.modifiedCount === 1) {
+    res.json({ success: true, message: "Password added" });
+  } else {
+    res
+      .status(400)
+      .json({ success: false, message: "User not found or update failed" });
+  }
+});
+
+app.get("/todo/:username", async (req, res) => {
+  const db = client.db(dbName);
+  const users = db.collection("users");
+  const username = req.params.username;
+
+  const user = await users.findOne({ username });
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  res.json({ success: true, passwords: user.todos || [] });
+});
+
+app.delete("/todo", async (req, res) => {
+  const { owner, todo } = req.body;
+
+  if (!owner || !todo) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+  const db = client.db(dbName);
+  const users = db.collection("users");
+
+  const result = await users.updateOne(
+    { username: owner },
+    { $push: { todos: { todo } } }
+  );
+
+  res.json({ success: true, message: "Deleted", result });
+});
+
 app.post("/login", async (req, res) => {
   await client.connect();
   const db = client.db(dbName);
   const collection = db.collection("users");
-    const { username, password } = req.body;    
-    const user = await collection.findOne({ username, password });
-    if (user) {
-        res.status(200).json({ message: "Login successful", user });
-    } else {
-        res.status(401).json({ message: "Invalid username or password" });
-    }
+  const { username, password } = req.body;
+  const user = await collection.findOne({ username, password });
+  if (user) {
+    res.status(200).json({ message: "Login successful", user });
+  } else {
+    res.status(401).json({ message: "Invalid username or password" });
+  }
 });
 
 app.post("/register", async (req, res) => {
   await client.connect();
   const db = client.db(dbName);
   const collection = db.collection("users");
-    const { username, password } = req.body;
-    const existingUser = await collection.findOne({ username });
-    if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-    }
-    const newUser = { username, password };
-    await collection.insertOne(newUser);
-    res.status(201).json({ message: "User registered successfully", user: newUser       })
+  const { username, password } = req.body;
+  const existingUser = await collection.findOne({ username });
+  if (existingUser) {
+    return res.status(400).json({ message: "User already exists" });
+  }
+  const newUser = { username, password };
+  await collection.insertOne(newUser);
+  res
+    .status(201)
+    .json({ message: "User registered successfully", user: newUser });
 });
+
+app.put("/todo", async (req, res) => {
+  const { owner, oldTodo, newTodo } = req.body;
+
+  if (!owner || !oldTodo || !newTodo) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+  const db = client.db(dbName);
+  const users = db.collection("users");
+
+  const result = await users.updateOne(
+    {
+      username: owner,
+      "todos.todo": oldTodo
+    },
+    {
+      $set: { "todos.$.todo": newTodo }
+    }
+  );
+
+  if (result.modifiedCount === 1) {
+    res.json({ success: true, message: "Todo updated successfully" });
+  } else {
+    res.status(404).json({ success: false, message: "Todo not found or update failed" });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
