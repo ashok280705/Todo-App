@@ -152,7 +152,7 @@ const Mainpage = () => {
               {showCompletedOnly ? "Show All" : "Show Done"}
             </button>
           </div>
-          <div className="bg-white/70 border border-gray-200 rounded-xl shadow-md p-5 space-y-4">
+        <div className="bg-white/70 border border-gray-200 rounded-xl shadow-md p-5 space-y-4 max-h-[50vh] overflow-y-auto">
             {todos.filter(t => showCompletedOnly ? t.iscomplete : true).map(todo => (
               <div key={todo.id} className="flex justify-between items-center border-b pb-3 last:border-b-0">
                 <div className="flex items-center gap-3">

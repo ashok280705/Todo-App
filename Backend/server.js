@@ -145,15 +145,17 @@ app.post("/login", async (req, res) => {
 app.post("/register", async (req, res) => {
   const db = client.db(dbName);
   const collection = db.collection("users");
-  const { username, password, Email } = req.body;
+  const { username, password, email } = req.body;
 
   const existingUser = await collection.findOne({ username });
 
   if (existingUser) {
     return res.status(400).json({ success: false, message: "User already exists" });
   }
-
-  const newUser = { username, password, Email, todos: [] };
+  if (!username || !password || !email) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+  const newUser = { username, password, email, todos: [] };
   await collection.insertOne(newUser);
 
   res.status(201).json({ success: true, message: "User registered successfully", user: newUser });
