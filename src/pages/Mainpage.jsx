@@ -10,24 +10,32 @@ const Mainpage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
-  const username = localStorage.getItem("username"); // ensure you stored this
+  const currentUser = localStorage.getItem("currentUser");
 
-  // 📥 Fetch todos on mount
   useEffect(() => {
-    fetch(`http://localhost:3000/todo/${username}`)
+    if (!currentUser) return;
+
+    fetch(`http://localhost:3000/todo/${currentUser}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          setTodos(data.passwords.map(item => ({ Todo: item.todo, iscomplete: !!item.iscomplete, id: item.id || uuidv4() })));
+        if (data.success && Array.isArray(data.todos)) {
+          setTodos(
+            data.todos.map(item => ({
+              Todo: item.todo,
+              iscomplete: !!item.iscomplete,
+              id: item.id || uuidv4(),
+            }))
+          );
+        } else {
+          setTodos([]);
         }
       })
       .catch(console.error);
-  }, [username]);
+  }, [currentUser]);
 
-  // 🆕 Add new todo
   const HandleAddChange = async () => {
     if (!todoText.trim()) return;
-    const payload = { owner: username, todo: todoText };
+    const payload = { owner: currentUser, todo: todoText };
 
     const res = await fetch("http://localhost:3000/todo", {
       method: "POST",
@@ -44,35 +52,47 @@ const Mainpage = () => {
     }
   };
 
-  const handleToggleComplete = async (id) => {
-    const todo = todos.find(t => t.id === id);
-    const newStatus = !todo.iscomplete;
-    const updatedText = todo.Todo;
+ const handleToggleComplete = async (id) => {
+  const todo = todos.find(t => t.id === id);
+  const newStatus = !todo.iscomplete;
 
-    const res = await fetch("http://localhost:3000/todo", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        owner: username,
-        oldTodo: todo.Todo,
-        newTodo: updatedText
-      }),
-    });
-    const result = await res.json();
+  // First update locally for instant feedback
+  setTodos(prev =>
+    prev.map(t =>
+      t.id === id ? { ...t, iscomplete: newStatus } : t
+    )
+  );
 
-    if (result.success) {
-      setTodos(prev => prev.map(t => t.id === id ? { ...t, iscomplete: newStatus } : t));
-    } else {
-      alert(result.message);
-    }
-  };
+  // Then update in MongoDB using new API route
+  const res = await fetch("http://localhost:3000/todo/status", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      owner: currentUser,
+      todo: todo.Todo,
+      iscomplete: newStatus,
+    }),
+  });
+
+  const result = await res.json();
+
+  if (!result.success) {
+    alert(result.message);
+    // Optionally revert the local update if it failed on server
+    setTodos(prev =>
+      prev.map(t =>
+        t.id === id ? { ...t, iscomplete: !newStatus } : t
+      )
+    );
+  }
+};
 
   const saveEdit = async (id) => {
     const oldTodo = todos.find(t => t.id === id).Todo;
     const res = await fetch("http://localhost:3000/todo", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ owner: username, oldTodo, newTodo: editText }),
+      body: JSON.stringify({ owner: currentUser, oldTodo, newTodo: editText }),
     });
     const result = await res.json();
     if (result.success) {
@@ -88,7 +108,7 @@ const Mainpage = () => {
     const res = await fetch("http://localhost:3000/todo", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ owner: username, todo: todo.Todo }),
+      body: JSON.stringify({ owner: currentUser, todo: todo.Todo }),
     });
     const result = await res.json();
 
@@ -115,7 +135,7 @@ const Mainpage = () => {
     <>
       <Navbar />
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#e0f7fa] via-[#e1bee7] to-[#fce4ec] blur-sm" />
-      <div className="min-h-[calc(100vh-158px)] text-gray-800 px-4">
+      <div className="min-h-[calc(100vh-170px)] text-gray-800 px-4">
         <div className="max-w-3xl mx-auto py-10">
           <h1 className="text-3xl font-bold text-center mb-8 text-purple-700">Todo Master</h1>
           <div className="flex gap-3 mb-6">

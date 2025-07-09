@@ -16,32 +16,35 @@ const Login = () => {
   };
 
   const onSubmit = async (data) => {
-    const endpoint = isRegister ? "register" : "login";
+  const endpoint = isRegister ? "register" : "login";
 
-    try {
-      const res = await fetch(`http://localhost:3000/${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+  try {
+    const res = await fetch(`http://localhost:3000/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-      const result = await res.json();
+    const result = await res.json();
 
-      if (!result.success) {
-        alert(result.message);
-        return;
-      }
-
+    if (!result.success) {
       alert(result.message);
-      setcurrentUser(data.username);
-      navigate("/app"); // ✅ now it will navigate correctly
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Something went wrong");
+      return;
     }
-  };
+
+    alert(result.message);
+
+    // ✅ Only save to localStorage
+    localStorage.setItem("currentUser", data.username);
+
+    navigate("/app");
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Something went wrong");
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#e0f7fa] via-[#e1bee7] to-[#fce4ec] px-4">
